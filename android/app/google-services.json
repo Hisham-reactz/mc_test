@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "547269833536",
+    "project_id": "testwizard-98084",
+    "storage_bucket": "testwizard-98084.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:547269833536:android:ed17df17ae72e65911c0a5",
+        "android_client_info": {
+          "package_name": "com.mobohybrid.testwizard"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "547269833536-0i8fvet0ae0jhm55m0j2n7mglks2p7dt.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD8Keg9oilTqGjEp_a6RLFTvJY3he3-7RU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "547269833536-0i8fvet0ae0jhm55m0j2n7mglks2p7dt.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
