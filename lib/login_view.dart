@@ -47,7 +47,7 @@ class _LoginViewState extends State<LoginView> {
                   ],
                 ),
                 Align(
-                  alignment: const Alignment(0, -0.75),
+                  alignment: Alignment.topCenter,
                   child: GestureDetector(
                     onTap: () async {
                       try {
@@ -66,18 +66,21 @@ class _LoginViewState extends State<LoginView> {
                         rethrow;
                       }
                     },
-                    child: CircleAvatar(
-                      radius: 50,
-                      backgroundColor: Colors.grey,
-                      backgroundImage:
-                          _imager == null ? null : FileImage(_imager!),
-                      child: _imager == null
-                          ? const Icon(
-                              Icons.account_circle,
-                              color: Colors.white,
-                              size: 75,
-                            )
-                          : const SizedBox.shrink(),
+                    child: SizedBox(
+                      height: 250,
+                      child: CircleAvatar(
+                        radius: 50,
+                        backgroundColor: Colors.grey,
+                        backgroundImage:
+                            _imager == null ? null : FileImage(_imager!),
+                        child: _imager == null
+                            ? const Icon(
+                                Icons.account_circle,
+                                color: Colors.white,
+                                size: 75,
+                              )
+                            : const SizedBox.shrink(),
+                      ),
                     ),
                   ),
                 ),
