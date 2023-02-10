@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart' hide EmailAuthProvider;
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
@@ -67,7 +68,9 @@ class _LoginViewState extends State<LoginView> {
                       }
                     },
                     child: SizedBox(
-                      height: 250,
+                      height: kIsWeb
+                          ? MediaQuery.of(context).size.height / 8
+                          : MediaQuery.of(context).size.height / 3,
                       child: CircleAvatar(
                         radius: 50,
                         backgroundColor: Colors.grey,
