@@ -2,14 +2,15 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-class Weather {
+// Entities
+class WeatherData {
   final String time;
-  final num? windSpeed;
-  final num? humidity;
-  final num? temperature;
+  final num windSpeed;
+  final num humidity;
+  final num temperature;
   final String location;
 
-  Weather({
+  WeatherData({
     required this.time,
     required this.windSpeed,
     required this.humidity,
@@ -17,28 +18,59 @@ class Weather {
     required this.location,
   });
 
-  factory Weather.fromJson(Map<String, dynamic> json) {
-    return Weather(
+  factory WeatherData.fromJson(Map<String, dynamic> json) {
+    return WeatherData(
       time: json['time'],
       windSpeed: json['values']['windSpeed'],
       humidity: json['values']['humidity'],
       temperature: json['values']['temperature'],
-      location: json['location'],
+      location: "",
     );
   }
 }
 
+// Use Cases
+class GetWeatherData {
+  final String apiKey;
+
+  GetWeatherData({
+    required this.apiKey,
+  });
+
+  Future<List<WeatherData>> execute(String city) async {
+    final response = await http.get(
+      Uri.parse(
+        "https://api.tomorrow.io/v4/weather/forecast?location=$city&apikey=$apiKey",
+      ),
+    );
+    if (response.statusCode == 200) {
+      final responseJson = json.decode(response.body);
+      List weatherData = responseJson['timelines']['hourly'];
+      return weatherData
+          .map((weather) => WeatherData.fromJson(weather))
+          .toList();
+    } else {
+      throw Exception('Failed to load weather data');
+    }
+  }
+}
+
+// UI
 class WeatherList extends StatefulWidget {
-  const WeatherList({super.key});
+  final GetWeatherData useCase;
+
+  const WeatherList({
+    super.key,
+    required this.useCase,
+  });
 
   @override
   _WeatherListState createState() => _WeatherListState();
 }
 
 class _WeatherListState extends State<WeatherList> {
-  List<Weather> _weathers = [];
+  List<WeatherData> _weathers = [];
   String _city = "India/Kolkata";
-  final String _apiKey = "A5saI8Gz2Fw49VvBKfEPRLKy8ZBQQNFb";
   TextEditingController cityController = TextEditingController();
 
   @override
@@ -49,21 +81,8 @@ class _WeatherListState extends State<WeatherList> {
   }
 
   _fetchWeatherData() async {
-    final response = await http.get(
-      Uri.parse(
-        "https://api.tomorrow.io/v4/weather/forecast?location=$_city&apikey=$_apiKey",
-      ),
-    );
-    if (response.statusCode == 200) {
-      Map<String, dynamic> responseJson = json.decode(response.body);
-      List weatherData = responseJson['timelines']['hourly'];
-      setState(() {
-        _weathers =
-            weatherData.map((weather) => Weather.fromJson(weather)).toList();
-      });
-    } else {
-      throw Exception('Failed to load weather data');
-    }
+    _weathers = await widget.useCase.execute(_city);
+    setState(() {});
   }
 
   @override
@@ -73,27 +92,26 @@ class _WeatherListState extends State<WeatherList> {
       child: Stack(
         children: [
           ListView.builder(
-            itemCount: _weathers.length,
-            itemBuilder: (context, index) {
-              final weather = _weathers[index];
-              return ListTile(
-                title: Text(_city),
-                subtitle: Text(weather.time.toString()),
-                trailing: Text('Temp : ${weather.temperature} °C'),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => WeatherDetailsPage(
-                        weather: weather,
-                        location: _city,
+              itemCount: _weathers.length,
+              itemBuilder: (context, index) {
+                final weather = _weathers[index];
+                return ListTile(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => WeatherDetailsPage(
+                          weather: weather,
+                          location: _city,
+                        ),
                       ),
-                    ),
-                  );
-                },
-              );
-            },
-          ),
+                    );
+                  },
+                  title: Text(_city),
+                  subtitle: Text(weather.time.toString()),
+                  trailing: Text('Temp:${weather.temperature}°C'),
+                );
+              }),
           Align(
             alignment: Alignment.topRight,
             child: Material(
@@ -101,7 +119,7 @@ class _WeatherListState extends State<WeatherList> {
                 onTap: () {
                   changeCity();
                 },
-                child: const Text("Change Location"),
+                child: const Text("ChangeLocation"),
               ),
             ),
           ),
@@ -116,10 +134,10 @@ class _WeatherListState extends State<WeatherList> {
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Enter City'),
+          title: const Text('EnterCity'),
           content: TextField(
             controller: cityController,
-            decoration: const InputDecoration(hintText: 'e.g. London, UK'),
+            decoration: const InputDecoration(hintText: 'e.g.London,UK'),
           ),
           actions: <Widget>[
             ElevatedButton(
@@ -141,7 +159,7 @@ class _WeatherListState extends State<WeatherList> {
 
 class WeatherDetailsPage extends StatelessWidget {
   final String location;
-  final Weather weather;
+  final WeatherData weather;
 
   const WeatherDetailsPage({
     super.key,
@@ -162,7 +180,7 @@ class WeatherDetailsPage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
             Text(
-              'Location: $location',
+              'Location:$location',
               style: const TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
@@ -170,7 +188,7 @@ class WeatherDetailsPage extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              'Temperature: ${weather.temperature}°C',
+              'Temperature:${weather.temperature}°C',
               style: const TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
@@ -178,14 +196,14 @@ class WeatherDetailsPage extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              'Wind Speed: ${weather.windSpeed} m/s',
+              'WindSpeed:${weather.windSpeed}m/s',
               style: const TextStyle(
                 fontSize: 18,
               ),
             ),
             const SizedBox(height: 16),
             Text(
-              'Humidity: ${weather.humidity}%',
+              'Humidity:${weather.humidity}%',
               style: const TextStyle(
                 fontSize: 18,
               ),

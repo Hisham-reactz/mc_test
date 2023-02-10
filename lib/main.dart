@@ -12,5 +12,7 @@ Future<void> main() async {
       projectId: "testwizard-98084",
     ),
   );
-  runApp(const LoginView());
+  runApp(
+    const LoginView(),
+  );
 }
